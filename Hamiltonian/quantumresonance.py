@@ -42,43 +42,21 @@ class VisualizingQunatumResonance(ThreeDScene):
         psiquantum = np.array([[np.cos(btheta/2)*np.cos(psitheta/2)+np.sin(btheta/2)*np.sin(psitheta/2)*cmath.exp(complex(0, psiphi-bphi))], [np.sin(btheta/2)*np.cos(psitheta/2)-np.cos(btheta/2)*np.sin(psitheta/2)*cmath.exp(complex(0, psiphi-bphi))]])        
         
         thing = self.quantumToSpherical((cmath.exp(complex(0, -1*eplus*t/hbar))*psiquantum[0][0])*evectorplus + (cmath.exp(complex(0, -1*eminus*t/hbar))*psiquantum[1][0])*evectorminus)
-        #print ((ogpsiquantum[0][0])*evectorplus)
-        #print ("quantum state: " + str(cmath.exp(complex(0, -1*eplus*t/hbar))*ogpsiquantum[0][0])*evectorplus + (cmath.exp(complex(0, -1*eminus*t/hbar))*ogpsiquantum[1][0])*evectorminus)
-        #print("spherical: " + str(thing))
-        #print ("position: " + str(self.sphericalToRectangular(thing[0], thing[1], thing[2])))
-        #print ("")
+       
         return self.sphericalToRectangular(thing[0].real, thing[1].real, thing[2].real)
 
-    '''def get_param_func(self, axes, t, brho, btheta, bphi, psitheta, psiphi):
-        tol = 1e-9
-
-        pf = ParametricFunction(
-            lambda t: axes.c2p(*self.hamilFunc(t, brho, btheta, bphi, psitheta, psiphi)),
-            t_range=[0, t, 0.007],
-            tolerance_for_point_equality=tol
-        )
-        
-        pf.set_color(color=[RED, YELLOW, BLUE, RED])
-        return pf
-'''
-
     def quantumToSpherical(self, quantum):
-        #print ("modulus = " + str(abs(quantum[0][0])+abs(quantum[1][0])))
-        #print(quantum[0][0])
-        #print("old: " + str(quantum))
         overallphase = cmath.phase(quantum[0][0])
         newquantum = np.array([[quantum[0][0] * cmath.exp(complex(0, -1*overallphase))], [quantum[1][0]* cmath.exp(complex(0, -1*overallphase))]], dtype= "complex_")
-        #print(newquantum)
-        #print("")
+
         foundtheta = np.arccos(newquantum[0][0])*2
-        #print (foundtheta)
+
         if abs(foundtheta) < 0.000001:
             return [1, 0, 0] #spin up in z basis
         if abs(foundtheta) > PI-0.0000001:
             return [1, PI, 0] #spin down in z basis
         thinginside = (newquantum[1][0])/np.sin(foundtheta/2)
-        #print(quantum)
-        #print(thinginside)
+
         foundphi = cmath.log(thinginside)*complex(0, -1)
         return np.array([1, foundtheta, foundphi])
 
@@ -91,8 +69,6 @@ class VisualizingQunatumResonance(ThreeDScene):
     def setup(self):
         axes = ThreeDAxes(x_range=(-2, 2, 1), y_range=(-2, 2, 1), z_range=(-2, 2, 1), x_length=8, y_length=8, z_length=8)
         points.append(list(axes.c2p(0, 0, 1)))
-
-
         
     def construct(self):       
         axes = ThreeDAxes(x_range=(-2, 2, 1), y_range=(-2, 2, 1), z_range=(-2, 2, 1), x_length=8, y_length=8, z_length=8) #defining axes
@@ -109,15 +85,9 @@ class VisualizingQunatumResonance(ThreeDScene):
         bmodfrequency = 0
         bmodstrength = 1
 
-        #bzero = 
-        #bone = 
-        #btwo = 
-
-        #initialbrho = np.sqrt(bzero**2 + bone**2 + btwo**2)
         initialbrho = 1
         initialbtheta = PI/4
         initialbphi = 0
-
 
         brho = ValueTracker(initialbrho).add_updater(lambda m: m.set_value(initialbrho + bmodstrength * np.sin(timer.get_value() * bmodfrequency)))
         btheta = ValueTracker(initialbtheta)
@@ -131,40 +101,12 @@ class VisualizingQunatumResonance(ThreeDScene):
 
         psiangles = Dot(point = [1, 0, 0], radius = 0).add_updater(lambda m: m.move_to([1, self.hamilFuncButSpherical(0.1, brho.get_value(), btheta.get_value(), bphi.get_value(), psiangles.get_y(), psiangles.get_z(), axes)[1], self.hamilFuncButSpherical(0.1, brho.get_value(), btheta.get_value(), bphi.get_value(), psiangles.get_y(), psiangles.get_z(), axes)[2]]))
 
-        
-
-        ''' psitheta = ValueTracker(initialpsitheta).add_updater(lambda m: m.set_value(
-            self.hamilFuncButSpherical(timer.get_value(), brho.get_value(), btheta.get_value(), bphi.get_value(), psitheta.get_value(), psiphi.get_value())[1]
-        ))
-
-        psiphi = ValueTracker(initialpsiphi).add_updater(lambda m: m.set_value(
-            self.hamilFuncButSpherical(timer.get_value(), brho.get_value(), btheta.get_value(), bphi.get_value(), psitheta.get_value(), psiphi.get_value())[2]
-        ))'''
-        
         ogpsirectangular = self.sphericalToRectangular(1.0, initialpsitheta, initialpsiphi)
-
-        #changingpsiquantum = ogpsiquantum.add_updater(lambda m: m.become(
-        #    cmath.exp(-i*eplus*timer.get_value()/hbar)*ogpsiquantum[0]*evectorplus + cmath.exp(-i*eminus*timer.get_value()/hbar)*ogpsiquantum[1]*evectorminus
-        #))
-
-        #psirectangular = self.sphericalToRectangular(self.quantumToSpherical(ogpsiquantum)).add_updater(lambda n: n.become(self.sphericalToRectangular(self.quantumToSpherical(changingpsiquantum))))
-
-        
 
         bvector = Arrow((0, 0, 0), axes.c2p(ogbrectangular[0], ogbrectangular[1], ogbrectangular[2]), buff=0, color=BLUE_D).add_updater(lambda m: m.put_start_and_end_on([0, 0, 0], axes.c2p(self.sphericalToRectangular(brho.get_value(), btheta.get_value(), bphi.get_value())[0], self.sphericalToRectangular(brho.get_value(), btheta.get_value(), bphi.get_value())[1], self.sphericalToRectangular(brho.get_value(), btheta.get_value(), bphi.get_value())[2])))
             
         psivector = Arrow((0, 0, 0), axes.c2p(ogpsirectangular[0], ogpsirectangular[1], ogpsirectangular[2]), buff=0, color=WHITE).add_updater(lambda m: m.put_start_and_end_on([0,0,0], axes.c2p(self.hamilFunc(0.1, brho.get_value(), btheta.get_value(), bphi.get_value(), psiangles.get_y(), psiangles.get_z())[0], self.hamilFunc(0.1, brho.get_value(), btheta.get_value(), bphi.get_value(), psiangles.get_y(), psiangles.get_z())[1], self.hamilFunc(0.1, brho.get_value(), btheta.get_value(), bphi.get_value(), psiangles.get_y(), psiangles.get_z())[2]))) 
-
         
-
-
-        
-        
-        #psivector = Arrow((0, 0, 0), axes.c2p(ogpsirectangular[0], ogpsirectangular[1], ogpsirectangular[2]), buff=0, color=WHITE).add_updater(lambda m: m.put_start_and_end_on([0,0,0], axes.c2p(self.hamilFunc(timer.get_value(), brho.get_value(), btheta.get_value(), bphi.get_value(), psitheta.get_value(), psiphi.get_value())[0], self.hamilFunc(timer.get_value(), brho.get_value(), btheta.get_value(), bphi.get_value(), psitheta.get_value(), psiphi.get_value())[1], self.hamilFunc(timer.get_value(), brho.get_value(), btheta.get_value(), bphi.get_value(), psitheta.get_value(), psiphi.get_value())[2]))) 
-
-        #pf = self.get_param_func(axes, timer.get_value(), eplus, eminus, ogpsiquantum, evectorplus, evectorminus)   
-        #pf.add_updater(lambda mob: mob.become(self.get_param_func(axes, timer.get_value(), eplus, eminus, ogpsiquantum, evectorplus, evectorminus)))
-
         psithetatext = str(np.ceil(1000*initialpsitheta)/1000)
         psiphitext = str(np.ceil(1000*initialpsiphi)/1000)
         bthetatext = str(np.ceil(1000*initialbtheta)/1000)
@@ -177,12 +119,9 @@ class VisualizingQunatumResonance(ThreeDScene):
         vg.to_corner(UR)
 
         def get_param_func(group):
-            #print(points)
-            #print("a")
             newpath = VGroup(color = RED)
             newpath.set_points_smoothly(np.array(points))
             group.become(newpath)
-        #return path
 
         path = VGroup().add_updater(get_param_func)
       
